@@ -1,31 +1,24 @@
 package br.com.crudjava.crudjava_junit.persistencias;
-
-import br.com.crudjava.crudjava_junit.models.Loja;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
+import br.com.crudjava.crudjava_junit.models.Loja;
+import br.com.crudjava.crudjava_junit.utils.ValidacaoLoja;
 
 public class ArquivoLoja {
     private static final String CAMINHO_ARQUIVO = "lojas.dat";
 
-
     public static void salvarLista(ArrayList<Loja> lojas) {
         try {
             File arquivo = new File(CAMINHO_ARQUIVO);
-            if (!arquivo.exists()) {
-                arquivo.createNewFile();
-            }
+            if (!arquivo.exists()) arquivo.createNewFile();
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(arquivo));
             oos.writeObject(lojas);
             oos.close();
-            System.out.println("Lista de lojas salva com sucesso!");
-        } catch (FileNotFoundException e) {
-            System.err.println("Erro ao salvar lista de lojas:  " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Erro ao salvar lista de lojas: " + e.getMessage());
         }
     }
-
 
     public static ArrayList<Loja> lerLista() {
         ArrayList<Loja> lista = new ArrayList<>();
@@ -36,69 +29,75 @@ public class ArquivoLoja {
                 lista = (ArrayList<Loja>) ois.readObject();
                 ois.close();
             }
-        } catch (ClassNotFoundException e) {
-            System.err.println("Erro ao ler lista de lojas:  - " + e.getMessage());
-        } catch (IOException e) {
-            System.err.println("Erro ao ler lista de lojas:   " + e.getMessage());
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Erro ao ler lista de lojas: " + e.getMessage());
         }
         return lista;
     }
 
-    public static void adicionarLoja(Loja novaLoja) {
-        ArrayList<Loja> lojas = lerLista();
+    public static String adicionarLoja(Loja novaLoja) {
+        if (!ValidacaoLoja.validarNome(novaLoja.getLojaNome()))
+            return "O nome da loja não pode ser vazio.";
+        String telefoneFormatado = ValidacaoLoja.validarFormatarTelefone(novaLoja.getLojaTelefone());
+        if (telefoneFormatado == null) return "Preencha todos os campos corretamente!";
+        if (!ValidacaoLoja.validarTipo(novaLoja.getLojaTipo()))
+            return "Preencha todos os campos corretamente!";
 
+        ArrayList<Loja> lojas = lerLista();
         for (Loja l : lojas) {
-            if (novaLoja.getLojaNome().equalsIgnoreCase(l.getLojaNome()) || novaLoja.getLojaTelefone().equals(l.getLojaTelefone())) {
-                System.out.println("Loja já existente! Loja não cadastrada!");
-                return;
+            if (novaLoja.getLojaNome().equalsIgnoreCase(l.getLojaNome()) ||
+                telefoneFormatado.equals(l.getLojaTelefone())) {
+                return "Já existe uma loja com mesmo nome ou telefone.";
             }
         }
+        novaLoja.setLojaTelefone(telefoneFormatado);
         lojas.add(novaLoja);
         salvarLista(lojas);
+        return "Loja cadastrada com sucesso!";
     }
 
-    public static void editarLoja(String nomeOriginalLoja, String novoNome, String novoTelefone, String novoTipo) throws IllegalArgumentException {
+    public static String editarLoja(String nomeOriginal, String novoNome, String novoTelefone, String novoTipo) {
         ArrayList<Loja> lojas = lerLista();
         Loja lojaParaEditar = null;
 
         for (Loja l : lojas) {
-            if (Objects.equals(l.getLojaNome(), nomeOriginalLoja)) {
+            if (Objects.equals(l.getLojaNome(), nomeOriginal)) {
                 lojaParaEditar = l;
                 break;
             }
         }
-
-        if (lojaParaEditar == null) {
-            throw new IllegalArgumentException("Loja com o nome '" + nomeOriginalLoja + "' não encontrada. Não foi possível atualizar.");
-        }
+        if (lojaParaEditar == null) return "Selecione uma loja para editar.";
+        if (!ValidacaoLoja.validarNome(novoNome) || !ValidacaoLoja.validarTipo(novoTipo))
+            return "Preencha todos os campos corretamente!";
+        String telefoneFormatado = ValidacaoLoja.validarFormatarTelefone(novoTelefone);
+        if (telefoneFormatado == null)
+            return "Preencha todos os campos corretamente! O telefone deve estar completo (ex: (XX) XXXXX-XXXX).";
 
         for (Loja l : lojas) {
             if (l != lojaParaEditar) {
-                if (novoNome.equalsIgnoreCase(l.getLojaNome())) {
-                    throw new IllegalArgumentException("Já existe outra loja com o nome '" + novoNome + "'. A edição não foi salva.");
-                }
-                if (novoTelefone.equals(l.getLojaTelefone())) {
-                    throw new IllegalArgumentException("Já existe outra loja com o telefone '" + novoTelefone + "'. A edição não foi salva.");
-                }
+                if (novoNome.equalsIgnoreCase(l.getLojaNome()))
+                    return "Já existe outra loja com esse nome. A edição não foi salva.";
+                if (telefoneFormatado.equals(l.getLojaTelefone()))
+                    return "Já existe outra loja com o telefone digitado. A edição não foi salva.";
             }
         }
+
         lojaParaEditar.setLojaNome(novoNome);
-        lojaParaEditar.setLojaTelefone(novoTelefone);
+        lojaParaEditar.setLojaTelefone(telefoneFormatado);
         lojaParaEditar.setLojaTipo(novoTipo);
         salvarLista(lojas);
+        return "Loja editada com sucesso!";
     }
 
-
-    public static void removerLoja(String lojaNome) {
+    public static String removerLoja(String nomeLoja) {
         ArrayList<Loja> lojas = lerLista();
         for (Loja l : lojas) {
-            if (Objects.equals(l.getLojaNome(), lojaNome)) {
+            if (Objects.equals(l.getLojaNome(), nomeLoja)) {
                 lojas.remove(l);
                 salvarLista(lojas);
-                System.out.println("Loja removida com sucesso!");
-                return;
+                return "Loja removida com sucesso!";
             }
         }
-        System.out.println("O nome da loja não foi encontrado, não foi possível excluir!");
+        return "Erro ao remover loja.";
     }
 }
