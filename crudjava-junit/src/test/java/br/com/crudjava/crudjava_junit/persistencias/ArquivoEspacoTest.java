@@ -59,7 +59,7 @@ public class ArquivoEspacoTest {
 
         Assertions.assertFalse(resultado);
 
-        Assertions.assertEquals("Área inválida.",
+        Assertions.assertEquals("Área inválida. area tem que ser maior que 0",
                 ArquivoEspaco.getUltimaMensagem());
 
         ArrayList<Espaco> lista = ArquivoEspaco.lerLista();
@@ -76,7 +76,7 @@ public class ArquivoEspacoTest {
 
         Assertions.assertFalse(resultado);
 
-        Assertions.assertEquals("Área inválida.",
+        Assertions.assertEquals("Área inválida. valores devem ser numeros",
                 ArquivoEspaco.getUltimaMensagem());
         Assertions.assertEquals(0, ArquivoEspaco.lerLista().size());
     }
@@ -89,7 +89,7 @@ public class ArquivoEspacoTest {
         boolean resultado = ArquivoEspaco.adicionarEspaco(piso, area);
 
         Assertions.assertFalse(resultado);
-        Assertions.assertEquals("Área inválida.",
+        Assertions.assertEquals("Área inválida. area deve estar preenchida",
                 ArquivoEspaco.getUltimaMensagem());
         Assertions.assertEquals(0, ArquivoEspaco.lerLista().size());
     }
@@ -102,7 +102,7 @@ public class ArquivoEspacoTest {
         boolean resultado = ArquivoEspaco.adicionarEspaco(piso, area);
 
         Assertions.assertFalse(resultado);
-        Assertions.assertEquals("Piso inválido.",
+        Assertions.assertEquals("Piso inválido. Piso deve ser maior que 0",
                 ArquivoEspaco.getUltimaMensagem());
         Assertions.assertEquals(0, ArquivoEspaco.lerLista().size());
     }
@@ -115,7 +115,7 @@ public class ArquivoEspacoTest {
         boolean resultado = ArquivoEspaco.adicionarEspaco(piso, area);
 
         Assertions.assertFalse(resultado);
-        Assertions.assertEquals("Piso inválido.",
+        Assertions.assertEquals("Piso inválido. Piso deve ser menor que 2",
                 ArquivoEspaco.getUltimaMensagem());
         Assertions.assertEquals(0, ArquivoEspaco.lerLista().size());
     }
@@ -173,7 +173,7 @@ public class ArquivoEspacoTest {
     }
 
     @Test
-    void CT11_editarEspacoAreaNaoNumerica_DeveFalhar() {
+    void CT10_editarEspacoAreaNaoNumerica_DeveFalhar() {
 
         ArquivoEspaco.adicionarEspaco("1", "50.5");
 
@@ -193,7 +193,7 @@ public class ArquivoEspacoTest {
     }
 
     @Test
-    void CT12_editarEspacoAreaEmBranco_DeveFalhar() {
+    void CT11_editarEspacoAreaEmBranco_DeveFalhar() {
 
         ArquivoEspaco.adicionarEspaco("1", "50.5");
 
@@ -204,7 +204,7 @@ public class ArquivoEspacoTest {
         boolean resultado = ArquivoEspaco.editarEspaco(idParaEditar, novoPiso, novaArea);
 
         Assertions.assertFalse(resultado);
-        Assertions.assertEquals("Área inválida.", ArquivoEspaco.getUltimaMensagem());
+        Assertions.assertEquals("Área inválida. nova area em branco", ArquivoEspaco.getUltimaMensagem());
 
 
         Espaco espacoOriginal = ArquivoEspaco.lerLista().get(0);
@@ -212,7 +212,7 @@ public class ArquivoEspacoTest {
     }
 
     @Test
-    void CT13_editarEspacoPisoForaDoIntervaloZero_DeveFalhar() {
+    void CT12_editarEspacoPisoForaDoIntervaloZero_DeveFalhar() {
 
         ArquivoEspaco.adicionarEspaco("1", "50.5");
 
@@ -224,14 +224,14 @@ public class ArquivoEspacoTest {
         boolean resultado = ArquivoEspaco.editarEspaco(idParaEditar, novoPiso, novaArea);
 
         Assertions.assertFalse(resultado);
-        Assertions.assertEquals("Piso inválido.", ArquivoEspaco.getUltimaMensagem());
+        Assertions.assertEquals("Piso inválido. piso deve ser maior que 0", ArquivoEspaco.getUltimaMensagem());
 
         Espaco espacoOriginal = ArquivoEspaco.lerLista().get(0);
         Assertions.assertEquals(1, espacoOriginal.getPiso());
     }
 
     @Test
-    void CT14_editarEspacoPisoEmBranco_DeveFalhar() {
+    void CT13_editarEspacoPisoEmBranco_DeveFalhar() {
 
         ArquivoEspaco.adicionarEspaco("1", "50.5");
 
@@ -243,13 +243,13 @@ public class ArquivoEspacoTest {
         boolean resultado = ArquivoEspaco.editarEspaco(idParaEditar, novoPiso, novaArea);
 
         Assertions.assertFalse(resultado);
-        Assertions.assertEquals("Piso inválido.", ArquivoEspaco.getUltimaMensagem());
+        Assertions.assertEquals("Piso inválido. Valor em branco", ArquivoEspaco.getUltimaMensagem());
 
         Espaco espacoOriginal = ArquivoEspaco.lerLista().get(0);
         Assertions.assertEquals(1, espacoOriginal.getPiso());
     }
     @Test
-    void CT15_removerEspacoSelecionadoValido_DeveRemoverComSucesso() {
+    void CT14_removerEspacoSelecionadoValido_DeveRemoverComSucesso() {
 
         ArquivoEspaco.adicionarEspaco("1", "100");
         Assertions.assertEquals(1, ArquivoEspaco.lerLista().size());
@@ -266,7 +266,7 @@ public class ArquivoEspacoTest {
     }
 
     @Test
-    void CT16_removerEspacoNaoExistente_DeveFalhar() {
+    void CT15_removerEspacoNaoExistente_DeveFalhar() {
 
         ArquivoEspaco.adicionarEspaco("1", "100");
         Assertions.assertEquals(1, ArquivoEspaco.lerLista().size());
