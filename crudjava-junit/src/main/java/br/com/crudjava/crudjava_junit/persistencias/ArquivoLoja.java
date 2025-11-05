@@ -36,11 +36,11 @@ public class ArquivoLoja {
     }
 
     public static String adicionarLoja(Loja novaLoja) {
-        if (!ValidacaoLoja.validarNome(novaLoja.getLojaNome()))
+        if (ValidacaoLoja.validarNome(novaLoja.getLojaNome()))
             return "O nome da loja não pode ser vazio.";
         String telefoneFormatado = ValidacaoLoja.validarFormatarTelefone(novaLoja.getLojaTelefone());
         if (telefoneFormatado == null) return "Preencha todos os campos corretamente!";
-        if (!ValidacaoLoja.validarTipo(novaLoja.getLojaTipo()))
+        if (ValidacaoLoja.validarTipo(novaLoja.getLojaTipo()))
             return "Preencha todos os campos corretamente!";
 
         ArrayList<Loja> lojas = lerLista();
@@ -67,7 +67,7 @@ public class ArquivoLoja {
             }
         }
         if (lojaParaEditar == null) return "Selecione uma loja para editar.";
-        if (!ValidacaoLoja.validarNome(novoNome) || !ValidacaoLoja.validarTipo(novoTipo))
+        if (ValidacaoLoja.validarNome(novoNome) || ValidacaoLoja.validarTipo(novoTipo))
             return "Preencha todos os campos corretamente!";
         String telefoneFormatado = ValidacaoLoja.validarFormatarTelefone(novoTelefone);
         if (telefoneFormatado == null)
