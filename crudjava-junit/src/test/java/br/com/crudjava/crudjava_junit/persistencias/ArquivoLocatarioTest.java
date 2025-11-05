@@ -1,7 +1,6 @@
 package br.com.crudjava.crudjava_junit.persistencias;
 
 import br.com.crudjava.crudjava_junit.models.Locatario;
-import br.com.crudjava.crudjava_junit.utils.ValidacaoLoja;
 import org.junit.jupiter.api.*;
 
 import java.io.*;

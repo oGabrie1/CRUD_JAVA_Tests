@@ -64,24 +64,23 @@ public class ModalEspacoEdit {
         Button btnSalvar = new Button("Salvar Alterações");
         btnSalvar.setMaxWidth(Double.MAX_VALUE);
         btnSalvar.setOnAction(e -> {
-            try {
-                int id = espaco.getId();
-                double novaArea = Double.parseDouble(txtArea.getText().replace(',', '.'));
-                int novoPiso = Integer.parseInt(txtPiso.getText());
+            // 1. Pegamos o ID (que já temos) e os novos valores de texto puros
+            int id = espaco.getId();
+            String areaStr = txtArea.getText();
+            String pisoStr = txtPiso.getText();
 
-                if (novaArea <= 0 || (novoPiso != 1 && novoPiso != 2)) {
-                    Alerts.alertError("Dados Inválidos", "Preencha os campos corretamente!\n(Área > 0 e Piso = 1 ou 2)");
-                    return;
-                }
+            // 2. Chamamos o método que aceita Strings e faz a validação interna
+            boolean sucesso = ArquivoEspaco.editarEspaco(id, pisoStr, areaStr);
 
-                ArquivoEspaco.editarEspaco(id, novoPiso, novaArea);
-
-                Alerts.alertInfo("Sucesso", "Espaço editado com sucesso!");
-
+            // 3. Verificamos o resultado
+            if (sucesso) {
+                // Se deu certo, mostra a mensagem de sucesso e fecha o modal
+                Alerts.alertInfo("Sucesso", ArquivoEspaco.getUltimaMensagem());
                 this.stage.close();
-
-            } catch (NumberFormatException ex) {
-                Alerts.alertError("Erro de Formato", "Verifique se a área e o piso são números válidos.");
+            } else {
+                // Se deu errado, a camada de persistência nos informa o porquê
+                Alerts.alertError("Erro de Validação", ArquivoEspaco.getUltimaMensagem());
+                // O modal continua aberto para o usuário corrigir
             }
         });
 

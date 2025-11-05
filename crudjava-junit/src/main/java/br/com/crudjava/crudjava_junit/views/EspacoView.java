@@ -89,24 +89,23 @@ public class EspacoView {
         borderPane.setCenter(painelTabela);
 
         btnCad.setOnAction(e -> {
-            try {
-                double area = Double.parseDouble(txtArea.getText());
-                int piso = Integer.parseInt(txtPiso.getText());
 
-                if (area <= 0 || (piso != 1 && piso != 2)) {
-                    throw new IllegalArgumentException("Preencha todos os campos corretamente!\n(Área > 0 e Piso = 1 ou 2)");
-                }
+            String areaStr = txtArea.getText();
+            String pisoStr = txtPiso.getText();
 
-                ArquivoEspaco.adicionarEspaco(piso, area);
-                espacosObservable.setAll(ArquivoEspaco.lerLista()); // Atualiza a tabela
+
+            boolean sucesso = ArquivoEspaco.adicionarEspaco(pisoStr, areaStr);
+
+
+            if (sucesso) {
+
+                espacosObservable.setAll(ArquivoEspaco.lerLista());
                 txtArea.clear();
                 txtPiso.clear();
-                Alerts.alertInfo("Sucesso", "Espaço cadastrado com sucesso!");
+                Alerts.alertInfo("Sucesso", ArquivoEspaco.getUltimaMensagem());
+            } else {
 
-            } catch (NumberFormatException ex) {
-                Alerts.alertError("Erro de Formato", "Verifique se a área e o piso são números válidos.");
-            } catch (IllegalArgumentException ex) {
-                Alerts.alertError("Erro de Validação", ex.getMessage());
+                Alerts.alertError("Erro de Validação", ArquivoEspaco.getUltimaMensagem());
             }
         });
 
