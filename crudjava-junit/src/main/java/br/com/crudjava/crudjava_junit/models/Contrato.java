@@ -1,10 +1,11 @@
 package br.com.crudjava.crudjava_junit.models;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Contrato implements Serializable{
+public class Contrato implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -16,11 +17,11 @@ public class Contrato implements Serializable{
     private ArrayList<Boleto> boletos;
 
     public Contrato(Locatario locatario, LocalDate dataInicio,
-                    double valorMensal, boolean ContratoStatus) {
+                    double valorMensal, boolean contratoStatus) {
         this.locatario = locatario;
         this.dataInicio = dataInicio;
         this.valorMensal = valorMensal;
-        this.contratoStatus = ContratoStatus;
+        this.contratoStatus = contratoStatus;
         this.boletos = new ArrayList<>();
     }
 
@@ -37,14 +38,6 @@ public class Contrato implements Serializable{
     }
 
     public void setLocatario(Locatario locatario) {
-        this.locatario = locatario;
-    }
-
-    public Locatario getlocatario() {
-        return locatario;
-    }
-
-    public void setNomeLocatario(Locatario locatario) {
         this.locatario = locatario;
     }
 
@@ -68,8 +61,11 @@ public class Contrato implements Serializable{
         return contratoStatus;
     }
 
+    // --- CORREÇÃO APLICADA AQUI ---
+    // O método original (contratoStatus = contratoStatus) não fazia nada.
+    // O correto é (this.contratoStatus = contratoStatus).
     public void setContratoStatus(boolean contratoStatus) {
-        contratoStatus = contratoStatus;
+        this.contratoStatus = contratoStatus;
     }
 
     public boolean isAtivo() {

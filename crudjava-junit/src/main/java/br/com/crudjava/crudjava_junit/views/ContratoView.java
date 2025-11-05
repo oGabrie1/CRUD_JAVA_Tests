@@ -34,6 +34,9 @@ public class ContratoView {
     private Stage stage;
     private ObservableList<Contrato> contratosObservable = observableArrayList();
 
+    // Armazena a lista de locatários para evitar recarregá-la
+    private ArrayList<Locatario> locatarios;
+
     public ContratoView(Stage stage) {
         this.stage = stage;
     }
@@ -47,7 +50,8 @@ public class ContratoView {
         stage.setTitle("Gestão de Contratos");
 
         ArrayList<Contrato> contratos = ArquivoContrato.lerLista();
-        ArrayList<Locatario> locatarios = ArquivoLocatario.lerLista();
+        // Carrega os locatários uma vez
+        locatarios = ArquivoLocatario.lerLista();
         contratosObservable.setAll(contratos);
 
         BorderPane borderPane = new BorderPane();
@@ -66,7 +70,10 @@ public class ContratoView {
         locatarioComboBox.setPromptText("Selecione a empresa");
         Set<String> cnpjComContratos = new HashSet<>();
         for (Contrato c : contratos){
-            cnpjComContratos.add(c.getlocatario().getLocatarioCnpj());
+
+            // --- CORREÇÃO DE TYPO 1 ---
+            // Era: c.getlocatario()
+            cnpjComContratos.add(c.getLocatario().getLocatarioCnpj());
         }
         for (Locatario l : locatarios){
             if (!cnpjComContratos.contains(l.getLocatarioCnpj())){
@@ -96,6 +103,8 @@ public class ContratoView {
         btnAtualizar.setMaxWidth(Double.MAX_VALUE);
         btnAtualizar.setOnAction(e -> {
             contratosObservable.setAll(ArquivoContrato.lerLista());
+            // Recarrega a lista de locatários disponíveis no ComboBox
+            recarregarComboBoxLocatarios(locatarioComboBox);
         });
 
         painelFormulario.getChildren().addAll(
@@ -118,59 +127,78 @@ public class ContratoView {
                 btnVerBoletos);
         borderPane.setCenter(painelTabela);
 
-        btnCadastrar.setOnAction(e -> {
-            try {
-                String nomeEmpresa = locatarioComboBox.getValue();
-                LocalDate dataInicio = datePickerInicio.getValue();
-                String valorTexto = txtValorMensal.getText().replace(",", ".");
-                double valorMensal = Double.parseDouble(valorTexto);
-                boolean status = checkStatus.isSelected();
-                ArrayList<Boleto> boletos = new ArrayList<>();
-                String linhaDig = "1000000000000";
-                BigInteger linhaDigNum = new BigInteger(linhaDig);
 
-                Locatario empresa = null;
-                for (Locatario l : locatarios){
+        // --- BLOCO btnCadastrar TOTALMENTE REFEITO ---
+        btnCadastrar.setOnAction(e -> {
+            // 1. Coletar dados brutos da View
+            String nomeEmpresa = locatarioComboBox.getValue();
+            LocalDate dataInicio = datePickerInicio.getValue();
+            String valorTexto = txtValorMensal.getText(); // Passa o texto puro
+            boolean status = checkStatus.isSelected();
+
+            // 2. Encontrar o objeto Locatario (necessário para o método)
+            Locatario empresa = null;
+            if (nomeEmpresa != null) {
+                for (Locatario l : locatarios){ // Usa a lista de locatários já carregada
                     if (nomeEmpresa.equals(l.getLocatarioNome())){
                         empresa = l;
                         break;
                     }
                 }
+            }
 
-                if (empresa == null || dataInicio == null) {
-                    throw new IllegalArgumentException("Nome e Data de Início são obrigatórios.");
+            // 3. Chamar o NOVO método de persistência (que faz a validação)
+            boolean sucesso = ArquivoContrato.adicionarContrato(
+                    empresa,       // O objeto Locatario
+                    dataInicio,    // O LocalDate
+                    valorTexto,    // A String do valor
+                    status         // O boolean
+            );
+
+            // 4. Tratar o resultado
+            if (sucesso) {
+                Alerts.alertInfo("Sucesso", ArquivoContrato.getUltimaMensagem());
+
+                // --- Lógica de Geração de Boleto (mantida do seu original) ---
+                // Precisamos encontrar o contrato que acabamos de salvar
+                ArrayList<Contrato> listaAtualizada = ArquivoContrato.lerLista();
+                Contrato contratoSalvo = null;
+                for(Contrato c : listaAtualizada) {
+                    if (c.getLocatario().getLocatarioCnpj().equals(empresa.getLocatarioCnpj())) {
+                        contratoSalvo = c;
+                        break;
+                    }
                 }
 
-                Contrato novoContrato = new Contrato(empresa, dataInicio,
-                        valorMensal, status);
+                if (contratoSalvo != null) {
+                    String linhaDig = "1000000000000";
+                    BigInteger linhaDigNum = new BigInteger(linhaDig);
 
-                ArquivoContrato.adicionarContrato(novoContrato);
-
-                for (int i = 1; i <= 12; i++) {
-                    LocalDate vencimento = dataInicio.plusMonths(i);
-                    linhaDigNum = linhaDigNum.add(BigInteger.ONE);
-                    linhaDig = linhaDigNum.toString();
-                    ArquivoBoleto.adicionarBoleto(new Boleto(3000, vencimento,
-                            "Tijucas Open", "Banco do Brasil", linhaDig,
-                            novoContrato), novoContrato.getContratoId());
+                    for (int i = 1; i <= 12; i++) {
+                        LocalDate vencimento = dataInicio.plusMonths(i);
+                        linhaDigNum = linhaDigNum.add(BigInteger.ONE);
+                        linhaDig = linhaDigNum.toString();
+                        ArquivoBoleto.adicionarBoleto(new Boleto(3000, vencimento,
+                                "Tijucas Open", "Banco do Brasil", linhaDig,
+                                contratoSalvo), contratoSalvo.getContratoId());
+                    }
+                    ArrayList<Boleto> boletos = ArquivoBoleto.lerLista(contratoSalvo.getContratoId());
+                    contratoSalvo.setBoletos(boletos);
+                    ArquivoContrato.atualizarContrato(contratoSalvo);
                 }
-                boletos = ArquivoBoleto.lerLista(novoContrato.getContratoId());
-                novoContrato.setBoletos(boletos);
-                ArquivoContrato.atualizarContrato(novoContrato);
+                // --- Fim da Lógica de Boleto ---
 
-                contratosObservable.add(novoContrato);
-
+                // Limpar e Atualizar a UI
+                contratosObservable.setAll(ArquivoContrato.lerLista());
+                recarregarComboBoxLocatarios(locatarioComboBox); // Atualiza o combo
                 locatarioComboBox.setValue(null);
-                datePickerInicio.setValue(null);
+                datePickerInicio.setValue(LocalDate.now());
                 txtValorMensal.clear();
                 checkStatus.setSelected(true);
-                Alerts.alertInfo("Sucesso", "Contrato cadastrado com sucesso!");
 
-            } catch (NumberFormatException ex) {
-                Alerts.alertError("Erro de Formato", "IDs " +
-                        "e Valor Mensal devem ser números válidos.");
-            } catch (IllegalArgumentException ex) {
-                Alerts.alertError("Erro de Validação", ex.getMessage());
+            } else {
+                // Se falhou, a camada de persistência nos diz o porquê
+                Alerts.alertError("Erro de Validação", ArquivoContrato.getUltimaMensagem());
             }
         });
 
@@ -189,6 +217,10 @@ public class ContratoView {
                     ArquivoContrato.removerContrato(
                             contratoSelecionado.getContratoId());
                     contratosObservable.remove(contratoSelecionado);
+
+                    // Atualiza o ComboBox caso o locatário fique livre
+                    recarregarComboBoxLocatarios(locatarioComboBox);
+
                     exibirAlerta(Alert.AlertType.INFORMATION, "Sucesso", "Contrato removido com sucesso!");
                 }
             });
@@ -222,7 +254,10 @@ public class ContratoView {
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<Contrato, String> colNomeEmpresa = new TableColumn<>("Nome Empresa");
-        colNomeEmpresa.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getlocatario().getLocatarioNome()));
+
+        // --- CORREÇÃO DE TYPO 2 ---
+        // Era: cell.getValue().getlocatario()
+        colNomeEmpresa.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getLocatario().getLocatarioNome()));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         TableColumn<Contrato, String> colDataInicio = new TableColumn<>("Data de Início");
@@ -297,5 +332,27 @@ public class ContratoView {
                 textField.setText(oldValue);
             }
         });
+    }
+
+    /**
+     * Método auxiliar para recarregar os locatários no ComboBox
+     */
+    private void recarregarComboBoxLocatarios(ComboBox<String> locatarioComboBox) {
+        locatarioComboBox.getItems().clear();
+
+        ArrayList<Contrato> contratos = ArquivoContrato.lerLista();
+        locatarios = ArquivoLocatario.lerLista(); // Recarrega a lista de locatários
+
+        Set<String> cnpjComContratos = new HashSet<>();
+        for (Contrato c : contratos){
+            if (c.isAtivo()) { // Considera apenas contratos ativos
+                cnpjComContratos.add(c.getLocatario().getLocatarioCnpj());
+            }
+        }
+        for (Locatario l : locatarios){
+            if (!cnpjComContratos.contains(l.getLocatarioCnpj())){
+                locatarioComboBox.getItems().add(l.getLocatarioNome());
+            }
+        }
     }
 }
