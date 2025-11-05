@@ -193,7 +193,6 @@ public class ArquivoLocatarioTest {
         Locatario loc = new Locatario("12345678910123", "empresa", "@", "12345678910");
         ArquivoLocatario.adicionarLocatario(loc);
 
-        // simula que apenas o último foi editado
         ArquivoLocatario.editarLocatario("12345678910123", "primeiraEdicao", "@", "12345678910");
         ArquivoLocatario.editarLocatario("12345678910123", "segundaEdicao", "@", "12345678910");
 
@@ -355,7 +354,6 @@ public class ArquivoLocatarioTest {
         ArquivoLocatario.adicionarLocatario(loc1);
         ArquivoLocatario.adicionarLocatario(loc2);
 
-        // aqui simula remover segundo
         boolean resultado = ArquivoLocatario.removerLocatario("12345678910124");
         Assertions.assertTrue(resultado);
         Assertions.assertEquals("Locatário removido com sucesso",

@@ -8,7 +8,7 @@ public class ValidacaoLocatario {
         String digitos = cnpj.replaceAll("\\D", "");
 
         if (digitos.length() > 14)
-            digitos = digitos.substring(0, 14); // ignora excedente
+            digitos = digitos.substring(0, 14);
 
         if (digitos.length() < 14)
             return "O CNPJ deve ser preenchido completamente.";
@@ -33,7 +33,6 @@ public class ValidacaoLocatario {
             return "Insira um e-mail válido";
         }
 
-        // Verifica apenas se contém o caractere '@'
         if (!email.contains("@")) {
             return "Insira um e-mail válido";
         }
@@ -52,7 +51,7 @@ public class ValidacaoLocatario {
         String digitos = telefone.replaceAll("\\D", "");
 
         if (digitos.length() > 11)
-            digitos = digitos.substring(0, 11); // ignora excedente
+            digitos = digitos.substring(0, 11);
 
         if (digitos.length() < 11)
             return "O Telefone deve ser preenchido completamente.";
