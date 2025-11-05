@@ -13,14 +13,13 @@ public class ArquivoContrato {
     private static final String CAMINHO_ARQUIVO = "contratos.dat";
     private static final String PROXIMO_ID_CAMINHO = "proximoId_contrato.dat";
 
-    // Adicionado para testes JUnit
     private static String ultimaMensagem;
 
     public static String getUltimaMensagem() {
         return ultimaMensagem;
     }
 
-    // Alterado de private para package-private (sem modificador) para testes
+    // Métodos package-private para testes
     static int lerProximoId(){
         try {
             File arquivoId = new File(PROXIMO_ID_CAMINHO);
@@ -37,7 +36,6 @@ public class ArquivoContrato {
         }
     }
 
-    // Alterado de private para package-private (sem modificador) para testes
     static void salvarProximoId(int id){
         try {
             File arquivoId = new File(PROXIMO_ID_CAMINHO);
@@ -53,7 +51,6 @@ public class ArquivoContrato {
         }
     }
 
-    // Alterado de public para package-private (sem modificador) para testes
     static void salvarLista(ArrayList<Contrato> contratos){
         try {
             File arquivo = new File(CAMINHO_ARQUIVO);
@@ -90,10 +87,6 @@ public class ArquivoContrato {
         return lista;
     }
 
-    /**
-     * Método modificado para aceitar dados brutos da View, realizar validação
-     * e retornar um status de sucesso/falha para testes.
-     */
     public static boolean adicionarContrato(
             Locatario locatario,
             LocalDate dataInicio,
@@ -103,6 +96,7 @@ public class ArquivoContrato {
         // --- 1. VALIDAÇÃO DE FRONT-END (UTILS) ---
         if (!ValidacaoContrato.validarLocatario(locatario)) {
             ultimaMensagem = "Selecione um locatário para continuar"; // CT02
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
         if (!ValidacaoContrato.validarDataInicio(dataInicio)) {
@@ -111,6 +105,7 @@ public class ArquivoContrato {
             } else {
                 ultimaMensagem = "A data de início não pode ser anterior à data atual."; // Limite
             }
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
         if (!ValidacaoContrato.validarValorMensal(valorMensalStr)) {
@@ -128,6 +123,7 @@ public class ArquivoContrato {
                     ultimaMensagem = "Informe um valor mensal válido."; // CT06
                 }
             }
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
 
@@ -135,9 +131,9 @@ public class ArquivoContrato {
         ArrayList<Contrato> contratos = lerLista();
         String cnpjLocatario = locatario.getLocatarioCnpj();
         for (Contrato c : contratos) {
-            // Regra: Não pode adicionar um contrato ATIVO se o locatário já tem um ATIVO.
             if (c.getLocatario().getLocatarioCnpj().equals(cnpjLocatario) && c.isAtivo() && status) {
                 ultimaMensagem = "Contrato já cadastrado para este locatário."; // CT08
+                System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
                 return false;
             }
         }
@@ -146,35 +142,30 @@ public class ArquivoContrato {
         double valorMensal = Double.parseDouble(valorMensalStr.trim().replace(",", "."));
         int novoId = lerProximoId();
 
-        // Usamos o construtor do seu modelo
         Contrato novoContrato = new Contrato(locatario, dataInicio, valorMensal, status);
-        novoContrato.setContratoId(novoId); // O ID é setado após a criação.
+        novoContrato.setContratoId(novoId);
 
         contratos.add(novoContrato);
         salvarLista(contratos);
         salvarProximoId(novoId + 1);
 
         ultimaMensagem = "Contrato cadastrado com sucesso!"; // CT01
+        System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
         return true;
     }
 
-    /**
-     * Método modificado para retornar boolean e mensagem para testes.
-     * Também foi corrigido um bug de ConcurrentModificationException.
-     */
     public static boolean removerContrato(int contratoId){
         ArrayList<Contrato> contratos = lerLista();
-
-        // A forma correta de remover de uma lista (evita ConcurrentModificationException)
         boolean removido = contratos.removeIf(c -> c.getContratoId() == contratoId);
 
         if (removido){
             salvarLista(contratos);
             ultimaMensagem = "Contrato removido com sucesso."; // CT09
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return true;
         } else {
-            // CT11 (implícito)
             ultimaMensagem = "Contrato não encontrado. Nenhuma remoção foi feita";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
     }
@@ -188,6 +179,7 @@ public class ArquivoContrato {
             }
         }
         salvarLista(contratos);
+        // Nota: Este método ainda não foi refatorado para testes
+        // (não retorna boolean/mensagem), então não há o que imprimir.
     }
-
 }

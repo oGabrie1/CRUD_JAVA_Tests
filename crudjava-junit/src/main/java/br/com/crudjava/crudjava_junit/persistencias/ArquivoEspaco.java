@@ -14,11 +14,14 @@ public class ArquivoEspaco {
     private static final Path ARQUIVO_DADOS_PATH = Paths.get("espacos.dat");
     private static final Path PROXIMO_ID_PATH = Paths.get("proximoId_espaco.dat");
 
+    // Adicionado para testes JUnit
     private static String ultimaMensagem;
 
     public static String getUltimaMensagem() {
         return ultimaMensagem;
     }
+
+    // --- MÉTODOS PRIVADOS (AGORA PACKAGE-PRIVATE PARA TESTES) ---
 
     private static int lerProximoId() {
         if (Files.exists(PROXIMO_ID_PATH)) {
@@ -32,6 +35,10 @@ public class ArquivoEspaco {
         return 1;
     }
 
+    /*
+     * Alterado de private para package-private (sem modificador)
+     * para que a classe de teste possa limpar o arquivo.
+     */
     static void salvarProximoId(int proximoId) {
         try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(PROXIMO_ID_PATH.toFile()))) {
             dos.writeInt(proximoId);
@@ -40,7 +47,10 @@ public class ArquivoEspaco {
         }
     }
 
-
+    /*
+     * Alterado de private para package-private (sem modificador)
+     * para que a classe de teste possa limpar o arquivo.
+     */
     static void salvarLista(ArrayList<Espaco> espacos) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARQUIVO_DADOS_PATH.toFile()))) {
             oos.writeObject(espacos);
@@ -61,23 +71,26 @@ public class ArquivoEspaco {
         }
     }
 
+    // --- MÉTODOS PÚBLICOS (MODIFICADOS PARA TESTES) ---
 
     public static boolean adicionarEspaco(String pisoStr, String areaStr) {
-
+        // 1. VALIDAÇÃO
         if (!ValidacaoEspaco.validarPiso(pisoStr)) {
             ultimaMensagem = "Piso inválido.";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
         if (!ValidacaoEspaco.validarArea(areaStr)) {
             ultimaMensagem = "Área inválida.";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
 
-
+        // 2. CONVERSÃO (Parsing)
         int piso = Integer.parseInt(pisoStr.trim());
         double area = Double.parseDouble(areaStr.trim().replace(",", "."));
 
-
+        // 3. LÓGICA DE NEGÓCIO (Persistência)
         ArrayList<Espaco> espacos = lerLista();
         int novoId = lerProximoId();
 
@@ -86,6 +99,7 @@ public class ArquivoEspaco {
         salvarProximoId(novoId + 1);
 
         ultimaMensagem = "Espaço cadastrado com sucesso!";
+        System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
         return true;
     }
 
@@ -96,28 +110,33 @@ public class ArquivoEspaco {
         if (removido) {
             salvarLista(espacos);
             ultimaMensagem = "Espaço removido com sucesso!";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return true;
         } else {
             ultimaMensagem = "O ID do espaço não foi encontrado.";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
     }
 
     public static boolean editarEspaco(int id, String novoPisoStr, String novaAreaStr){
-
+        // 1. VALIDAÇÃO
         if (!ValidacaoEspaco.validarPiso(novoPisoStr)) {
             ultimaMensagem = "Piso inválido.";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
         if (!ValidacaoEspaco.validarArea(novaAreaStr)) {
             ultimaMensagem = "Área inválida.";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
 
-
+        // 2. CONVERSÃO (Parsing)
         int novoPiso = Integer.parseInt(novoPisoStr.trim());
         double novaArea = Double.parseDouble(novaAreaStr.trim().replace(",", "."));
 
+        // 3. LÓGICA DE NEGÓCIO (Persistência)
         ArrayList<Espaco> espacos = lerLista();
         boolean encontrado = false;
 
@@ -133,9 +152,11 @@ public class ArquivoEspaco {
         if (encontrado) {
             salvarLista(espacos);
             ultimaMensagem = "Espaço editado com sucesso!";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return true;
         } else {
             ultimaMensagem = "O ID do espaço não foi encontrado.";
+            System.out.println(ultimaMensagem); // <-- ADICIONADO PARA O SEU DOCUMENTO
             return false;
         }
     }
