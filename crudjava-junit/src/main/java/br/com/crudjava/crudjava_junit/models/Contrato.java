@@ -61,9 +61,6 @@ public class Contrato implements Serializable {
         return contratoStatus;
     }
 
-    // --- CORREÇÃO APLICADA AQUI ---
-    // O método original (contratoStatus = contratoStatus) não fazia nada.
-    // O correto é (this.contratoStatus = contratoStatus).
     public void setContratoStatus(boolean contratoStatus) {
         this.contratoStatus = contratoStatus;
     }

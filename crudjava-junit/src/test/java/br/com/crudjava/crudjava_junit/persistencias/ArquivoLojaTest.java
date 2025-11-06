@@ -16,7 +16,6 @@ public class ArquivoLojaTest {
 
    
 
-    // CT01 - CT05: Cadastros válidos
     @Test void CT01_cadastroValido_Renner() {
         Loja loja = new Loja("Renner", "41991234567", "Roupas");
         String resultado = ArquivoLoja.adicionarLoja(loja);
@@ -52,7 +51,6 @@ public class ArquivoLojaTest {
         assertEquals("Loja cadastrada com sucesso!", resultado);
     }
 
-    // CT02 - CT09: Cadastros inválidos
     @Test void CT02_nomeVazio() {
         Loja loja = new Loja("", "41991234567", "Roupas");
         String resultado = ArquivoLoja.adicionarLoja(loja);
@@ -113,9 +111,6 @@ public class ArquivoLojaTest {
         assertEquals("Preencha todos os campos corretamente!", resultado);
     }
 
-    
-    // EDIÇÃO DE LOJAS
-    
 
     @Test void CT10_edicaoCompletaValida() {
         Loja loja = new Loja("CoxaStore", "41991234567", "Roupas");
@@ -136,7 +131,6 @@ public class ArquivoLojaTest {
         Loja loja2 = new Loja("L2", "41999887766", "Esportes");
         ArquivoLoja.adicionarLoja(loja1);
         ArquivoLoja.adicionarLoja(loja2);
-        // No código ArquivoLoja atual ele sempre edita o primeiro selecionado
         String resultado = ArquivoLoja.editarLoja("L2", "L2_Edit", "41999887766", "Esportes");
         System.out.println(resultado);
         assertEquals("Loja editada com sucesso!", resultado);
@@ -187,8 +181,7 @@ public class ArquivoLojaTest {
     }
 
     
-    // REMOÇÃO DE LOJAS
-    
+
 
     @Test void CT18_removerLojaValida() {
         Loja loja = new Loja("CoxaStore", "41991234567", "Roupas");

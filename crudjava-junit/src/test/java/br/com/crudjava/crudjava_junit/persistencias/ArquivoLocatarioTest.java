@@ -256,7 +256,6 @@ public class ArquivoLocatarioTest {
         ArquivoLocatario.adicionarLocatario(loc1);
         ArquivoLocatario.adicionarLocatario(loc2);
 
-        // Tentando mudar loc2 para o mesmo CNPJ do loc1
         ArquivoLocatario.editarLocatario("12345678910123", "empresa2", "@", "12345678910");
 
         Assertions.assertEquals("Locatário editado com sucesso!", ArquivoLocatario.getUltimaMensagem());
